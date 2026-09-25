@@ -7,109 +7,91 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <windows.h>
 
-// РџС–РґС–РЅС‚РµРіСЂР°Р»СЊРЅР° С„СѓРЅРєС†С–СЏ
+// Підінтегральна функція
 double f(double x) {
     return 1.0 / (4.0 + x * x);
 }
 
-// РњРµС‚РѕРґ Р»С–РІРёС… РїСЂСЏРјРѕРєСѓС‚РЅРёРєС–РІ
 double left_rect(double a, double b, int n) {
     double h = (b - a) / n;
     double sum = 0.0;
-    for (int i = 0; i < n; i++) {
-        sum += f(a + i * h);
-    }
+    for (int i = 0; i < n; i++) sum += f(a + i * h);
     return sum * h;
 }
 
-// РњРµС‚РѕРґ РїСЂР°РІРёС… РїСЂСЏРјРѕРєСѓС‚РЅРёРєС–РІ
 double right_rect(double a, double b, int n) {
     double h = (b - a) / n;
     double sum = 0.0;
-    for (int i = 1; i <= n; i++) {
-        sum += f(a + i * h);
-    }
+    for (int i = 1; i <= n; i++) sum += f(a + i * h);
     return sum * h;
 }
 
-// РњРµС‚РѕРґ С‚СЂР°РїРµС†С–Р№
 double trapezoid(double a, double b, int n) {
     double h = (b - a) / n;
     double sum = (f(a) + f(b)) / 2.0;
-    for (int i = 1; i < n; i++) {
-        sum += f(a + i * h);
-    }
+    for (int i = 1; i < n; i++) sum += f(a + i * h);
     return sum * h;
 }
 
-// РњРµС‚РѕРґ РїР°СЂР°Р±РѕР» (РЎС–РјРїСЃРѕРЅР°)
 double simpson(double a, double b, int n) {
     if (n % 2 != 0) n++;
     double h = (b - a) / n;
     double sum = f(a) + f(b);
     for (int i = 1; i < n; i++) {
         double x = a + i * h;
-        if (i % 2 != 0) {
-            sum += 4.0 * f(x);
-        } else {
-            sum += 2.0 * f(x);
-        }
+        sum += (i % 2 != 0) ? 4.0 * f(x) : 2.0 * f(x);
     }
     return sum * h / 3.0;
 }
 
 int main() {
 
-
-
+   // Встановлюємо CP1251 для консолі
     system("chcp 1251 > nul");
-    //РћРіРѕР»РѕС€РµРЅРЅСЏ С‚Р° С–РЅС–С†С–Р°Р»С–Р·СѓРІР°РЅРЅСЏ Р·РјС–РЅРЅРёС… С‚Р° РјР°СЃРёРІР°
 
+    //оголошення та ініціалізування зміних та масива
     double a = 0.0;
     double b = 1.0;
     int test_n[] = {10, 100, 1000, 10000};
 
-    // РћР±С‡РёСЃР»РµРЅРЅСЏ РґР»СЏ СЂС–Р·РЅРёС… n
-    printf("=== РћР±С‡РёСЃР»РµРЅРЅСЏ Р·Р° 4 РјРµС‚РѕРґР°РјРё ===\n");
+    printf("=================================================================\n");
+    printf("                  РЕЗУЛЬТАТИ ОБЧИСЛЕНЬ                           \n");
+    printf("=================================================================\n\n");
+
+    printf("%-8s | %-12s | %-12s | %-12s | %-12s\n", "n", "Ліві", "Праві", "Трапеції", "Сімпсон");
+    printf("-----------------------------------------------------------------\n");
+
     for (int i = 0; i < 4; i++) {
         int n = test_n[i];
-        printf("n = %-5d | L = %.8f | R = %.8f | T = %.8f | S = %.8f\n",
+        printf("%-8d | %-12.8f | %-12.8f | %-12.8f | %-12.8f\n",
                n, left_rect(a, b, n), right_rect(a, b, n), trapezoid(a, b, n), simpson(a, b, n));
     }
 
-    // РџРѕС€СѓРє N РґР»СЏ РїРѕС…РёР±РєРё eps = 0.0001
     double eps = 0.0001;
-    printf("\n=== РџРѕС€СѓРє N Р·Р° РїРѕС…РёР±РєРѕСЋ eps = %.4f ===\n", eps);
+    printf("\n-----------------------------------------------------------------\n");
+    printf("  Кількість проміжків N за умовою |I(N) - I(N+2)| <= %.4f\n", eps);
+    printf("-----------------------------------------------------------------\n");
 
     int n_l = 2;
-    while (fabs(left_rect(a, b, n_l) - left_rect(a, b, n_l + 2)) > eps) {
-        n_l += 2;
-    }
-    printf("Р›С–РІС– РїСЂСЏРјРѕРєСѓС‚РЅРёРєРё : N = %d\n", n_l);
+    while (fabs(left_rect(a, b, n_l) - left_rect(a, b, n_l + 2)) > eps) n_l += 2;
+    printf("Ліві прямокутники : N = %d | I(N) = %.8f\n", n_l, left_rect(a, b, n_l));
 
     int n_r = 2;
-    while (fabs(right_rect(a, b, n_r) - right_rect(a, b, n_r + 2)) > eps) {
-        n_r += 2;
-    }
-    printf("РџСЂР°РІС– РїСЂСЏРјРѕРєСѓС‚РЅРёРєРё: N = %d\n", n_r);
+    while (fabs(right_rect(a, b, n_r) - right_rect(a, b, n_r + 2)) > eps) n_r += 2;
+    printf("Праві прямокутники: N = %d | I(N) = %.8f\n", n_r, right_rect(a, b, n_r));
 
     int n_t = 2;
-    while (fabs(trapezoid(a, b, n_t) - trapezoid(a, b, n_t + 2)) > eps) {
-        n_t += 2;
-    }
-    printf("РњРµС‚РѕРґ С‚СЂР°РїРµС†С–Р№    : N = %d\n", n_t);
+    while (fabs(trapezoid(a, b, n_t) - trapezoid(a, b, n_t + 2)) > eps) n_t += 2;
+    printf("Метод трапецій    : N = %d | I(N) = %.8f\n", n_t, trapezoid(a, b, n_t));
 
     int n_s = 2;
-    while (fabs(simpson(a, b, n_s) - simpson(a, b, n_s + 2)) > eps) {
-        n_s += 2;
-    }
-    printf("РњРµС‚РѕРґ РЎС–РјРїСЃРѕРЅР°    : N = %d\n", n_s);
+    while (fabs(simpson(a, b, n_s) - simpson(a, b, n_s + 2)) > eps) n_s += 2;
+    printf("Метод Сімпсона    : N = %d | I(N) = %.8f\n", n_s, simpson(a, b, n_s));
 
     return 0;
 }
-
-
 
 
 
